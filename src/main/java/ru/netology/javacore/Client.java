@@ -22,5 +22,15 @@ public class Client {
             out.println("{ \"type\": \"ADD\", \"task\": \"task #" + pickRandomChar() + "\" }");
             System.out.println(in.readLine());
         }
+        try (
+                Socket socket = new Socket("localhost", 8989);
+                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+        ) {
+            out.println("{ \"type\": \"ADD\", \"task\": \"task #" + pickRandomChar() + "\" }");
+            System.out.println(in.readLine());
+
+        }
+
     }
 }
