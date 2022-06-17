@@ -1,61 +1,80 @@
 package ru.netology.javacore;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
 
 import java.io.*;
-import java.lang.reflect.Type;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Scanner;
 
 public class TodoServer {
 
+    static class Request {
 
-    public TodoServer(int port, Todos todos) throws IOException {
-        while (true) {
-            try (
-                    ServerSocket serverSocket = new ServerSocket(port);
-                    Socket clientSocket = serverSocket.accept(); // ждем подключения
-                    PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
-                    BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            ) {
+        String type, task;
 
-                String json = in.readLine();
+        public Request(String type, String task) {
+            this.type = type;
+            this.task = task;
+        }
 
-                GsonBuilder gsonBuilder = new GsonBuilder();
-                Gson gson = gsonBuilder.create();
-                todos = gson.fromJson(json, Todos.class);
-                if (todos.type.equals("ADD")) {
-                    todos.addTask(todos.task);
-                } else {
-                    todos.removeTask(todos.task);
-                }
-
-                out.println(todos.getAllTasks());
-            }
+        @Override
+        public String toString() {
+            return "type = '" + type + "', task = '" + task + "'";
         }
     }
 
-    public void start() throws IOException {
-        System.out.println("Starting server at " + "port...");
+    private final int port;
+    private final Todos todos;
+
+    public TodoServer(int port, Todos todos) {
+
+        this.port = port;
+        this.todos = todos;
+
     }
-//    public String ParseJson(String json){
-//        String as = ("{ \"type\": \"ADD\", \"task\": \"task # \" }");
-//
-//        JsonParser jsonParser = new JsonParser();
-//        Object obj = jsonParser.parse(as);
-//        JsonObject jsonObject = (JsonObject) obj;
-//
-////        String type = (String) jsonObject.get("type");
-//
-////        JsonArray jsonArray = (JsonArray) jsonParser.parse(json);
-//
-//        GsonBuilder gsonBuilder = new GsonBuilder();
-//        Gson gson = gsonBuilder.create();
-//        String todos = gson.fromJson(json, todos);
-//
-//    }
+
+    public void start() {
+
+        try (ServerSocket serverSocket = new ServerSocket(this.port)) {
+            System.out.println("\nStarting server at " + this.port + "... \nServer started...\n");
+            while (true) {
+                try (
+                        Socket clientSocket = serverSocket.accept();
+                        BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                        PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)
+                ) {
+                    System.out.println("New connection accepted!");
+                    System.out.println("Client address: " + clientSocket.getInetAddress() +
+                            " , port: " + clientSocket.getPort());
+                    String json = in.readLine();
+                    System.out.println("Client message: " + json);
+                    Request r = new Gson().fromJson(json, Request.class);
+                    switch (r.type) {
+                        case "ADD":
+                            System.out.println("Add task '" + r.task + "' to TODO list");
+                            todos.addTask(r.task);
+                            break;
+                        case "REMOVE":
+                            System.out.println("Remove task '" + r.task + "' from TODO list");
+                            todos.removeTask(r.task);
+                            break;
+                    }
+                    System.out.println("Send TODO list to client... ");
+                    out.println(todos.getAllTasks());
+                    System.out.println("Complete!\n");
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Can't start server!");
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "TodoServer { " +
+                " port = " + port +
+                ", todos = " + todos +
+                " } ";
+    }
 }
