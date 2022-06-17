@@ -1,79 +1,101 @@
 package ru.netology.javacore;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
+
+import org.junit.jupiter.api.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class TodosTests {
-    Todos todos;
-    List<String> list;
+
+    @BeforeAll
+    public static void initSuite() {
+        System.out.println("Running 'TodosTests' for methods of class \"Todos\"");
+    }
+
+    @AfterAll
+    public static void completeSuite() {
+        System.out.println("All 'TodosTests' complete! ");
+    }
 
     @BeforeEach
-    void beforeEach() {
-        todos = new Todos();
-        todos.addTask("Прибраться в ванной");
-        todos.addTask("Прибраться в кваритире");
-        todos.addTask("Арбитр юд");
-        todos.addTask("Готовкой занимается мама");
+    public void initTest() {
+        System.out.println("Starting new test");
+    }
 
-        list = new ArrayList<>();
-        list.add("Арбитр юд");
-        list.add("Готовкой занимается мама");
-        list.add("Прибраться в ванной");
-        list.add("Прибраться в кваритире");
+    @AfterEach
+    public void finalizeTest() {
+        System.out.println("Test complete!");
     }
 
     @Test
-    void addTask() {
-        list = new ArrayList<>();
-        list.add("task 1");
-        list.add("task 2");
-        list.add("task 3");
-        list.add("task 4");
+    @DisplayName("Test \"addTask()\" method")
+    public void addTaskTest(TestInfo addTaskTestInfo) {
 
-//         String.valueOf(list.stream().sorted().collect(Collectors.toList()));
-        String expected = String.valueOf(new ArrayList<String>(list));
-        todos = new Todos();
-        todos.addTask("task 1");
-        todos.addTask("task 4");
-        todos.addTask("task 3");
-        todos.addTask("task 2");
-        String actual = todos.getAllTasks();
+        Todos todo = new Todos();
 
-        Assertions.assertEquals(expected, actual);
+        todo.addTask("Doing something!");
+
+        boolean actual = todo.getAllTasks().contains("Doing something!");
+
+        Assertions.assertTrue(actual, addTaskTestInfo.getDisplayName() + " NO complete!");
+        System.out.println(addTaskTestInfo.getDisplayName() + " complete!");
     }
 
     @Test
-    void remouveTask() {
-        list = new ArrayList<>();
-        list.add("Прибраться в ванной");
-        list.add("Прибраться в кваритире");
-        String expected = String.valueOf(new ArrayList<String>(list));
+    @DisplayName("Test \"removeTask()\" method")
+    public void removeTaskTest(TestInfo removeTaskTestInfo) {
+
+        Todos todo = new Todos();
+
+        todo.addTask("Doing something!");
+        todo.removeTask("Doing something!");
+
+        boolean actual = todo.getAllTasks().contains("Doing something!");
+
+        Assertions.assertFalse(actual, removeTaskTestInfo.getDisplayName() + " NO complete!");
+        System.out.println(removeTaskTestInfo.getDisplayName() + " complete!");
+    }
 
 
-        todos.removeTask("Арбитр юд");
-        todos.removeTask("Готовкой занимается мама");
-        String actual = todos.getAllTasks();
+    @Test
+    @DisplayName("Test \"getAllTask()\" method")
+    public void getAllTasksTest(TestInfo getAllTasksTestInfo) {
 
-        Assertions.assertEquals(expected, actual);
+        Todos todo = new Todos();
+
+        String expected = "First task" +
+                " " +
+                "Second task" +
+                " " +
+                "Third task" +
+                " ";
+
+        todo.addTask("First task");
+        todo.addTask("Second task");
+        todo.addTask("Third task");
+
+        Assertions.assertEquals(expected, todo.getAllTasks(), getAllTasksTestInfo.getDisplayName() + " NO complete!");
+        System.out.println(getAllTasksTestInfo.getDisplayName() + " complete!");
     }
 
     @Test
-    void getAllTask() {
+    @DisplayName("Test \"getAllTasksAsList()\" method")
+    public void getAllTasksAsListTest(TestInfo getAllTasksAsListTestInfo) {
+        Todos todo = new Todos();
 
-        String expected = String.valueOf(list.stream().sorted().collect(Collectors.toList()));
+        todo.addTask("First task");
+        todo.addTask("Second task");
+        todo.addTask("Third task");
 
-        String actual = todos.getAllTasks();
+        List<String> expected = new ArrayList<>(Arrays.asList("First task", "Second task", "Third task"));
 
-        Assertions.assertEquals(expected, actual);
+        List<String> actual = todo.getAllTasksAsList();
+
+        Assertions.assertEquals(expected, actual, getAllTasksAsListTestInfo.getDisplayName() + " NO complete!");
+        System.out.println(getAllTasksAsListTestInfo.getDisplayName() + " complete!");
     }
 
 
 }
-
